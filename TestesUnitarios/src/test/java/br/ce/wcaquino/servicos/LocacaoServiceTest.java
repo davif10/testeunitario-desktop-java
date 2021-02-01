@@ -14,6 +14,7 @@ import org.hamcrest.core.Is;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Assert;
+import org.junit.Assume;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Rule;
@@ -50,6 +51,10 @@ public class LocacaoServiceTest {
 	
 	@Test
 	public void deveAlugarFilme() throws Exception {
+		Assume.assumeFalse(DataUtils.verificarDiaSemana(new Date(), Calendar.SATURDAY));
+		//Verifica que não é sábado, pois o método só funciona de segunda a sexta
+		
+		
 		//Cenario 
 		Usuario usuario = new Usuario("Usuario 1");
 		List<Filme> listaFilmes = Arrays.asList(new Filme("Filme 1",2,5.0));
@@ -60,6 +65,7 @@ public class LocacaoServiceTest {
 			
 			//Verificação
 			error.checkThat(locacao.getValor(), CoreMatchers.is(CoreMatchers.equalTo(5.0)));
+			error.checkThat(DataUtils.isMesmaData(locacao.getDataLocacao(),new Date()), is(true));
 			error.checkThat(DataUtils.isMesmaData(locacao.getDataRetorno(), DataUtils.obterDataComDiferencaDias(1)),CoreMatchers.is(true));
 			
 			
@@ -115,106 +121,12 @@ public class LocacaoServiceTest {
 		
 	}
 	
-	@Test
-	public void devePagar75PctNoFilme3() throws FilmeSemEstoqueException, LocadoraException {
-		
-		//Cenário
-		
-		Usuario usuario = new Usuario("Usuario 1");
-		List<Filme> listaFilmes = Arrays.asList(
-				new Filme("Filme 1",2,4.0),
-				new Filme("Filme 2",2,4.0),
-				new Filme("Filme 3",2,4.0));
-		
-		//Ação 
-		
-		Locacao resultado  = service.alugarFilme(usuario, listaFilmes);
-		
-		
-		//Verificação
-		
-		assertThat(resultado.getValor(),is(11.0));
-		
-		
-	}
-	
-	@Test
-	public void devePagar50PctNoFilme4() throws FilmeSemEstoqueException, LocadoraException {
-		
-		//Cenário
-		
-		Usuario usuario = new Usuario("Usuario 1");
-		List<Filme> listaFilmes = Arrays.asList(
-				new Filme("Filme 1",2,4.0),
-				new Filme("Filme 2",2,4.0),
-				new Filme("Filme 3",2,4.0),
-				new Filme("Filme 4",2,4.0));
-		
-		//Ação 
-		
-		Locacao resultado  = service.alugarFilme(usuario, listaFilmes);
-		
-		
-		//Verificação
-		
-		assertThat(resultado.getValor(),is(13.0));
-		
-		
-	}
-	
-	@Test
-	public void devePagar25PctNoFilme5() throws FilmeSemEstoqueException, LocadoraException {
-		
-		//Cenário
-		
-		Usuario usuario = new Usuario("Usuario 1");
-		List<Filme> listaFilmes = Arrays.asList(
-				new Filme("Filme 1",2,4.0),
-				new Filme("Filme 2",2,4.0),
-				new Filme("Filme 3",2,4.0),
-				new Filme("Filme 4",2,4.0),
-				new Filme("Filme 5",2,4.0));
-		
-		//Ação 
-		
-		Locacao resultado  = service.alugarFilme(usuario, listaFilmes);
-		
-		
-		//Verificação
-		
-		assertThat(resultado.getValor(),is(14.0));
-		
-		
-	}
-	
-	@Test
-	public void devePagar0PctNoFilme6() throws FilmeSemEstoqueException, LocadoraException {
-		
-		//Cenário
-		
-		Usuario usuario = new Usuario("Usuario 1");
-		List<Filme> listaFilmes = Arrays.asList(
-				new Filme("Filme 1",2,4.0),
-				new Filme("Filme 2",2,4.0),
-				new Filme("Filme 3",2,4.0),
-				new Filme("Filme 4",2,4.0),
-				new Filme("Filme 5",2,4.0),
-				new Filme("Filme 6",2,4.0));
-		
-		//Ação 
-		
-		Locacao resultado  = service.alugarFilme(usuario, listaFilmes);
-		
-		
-		//Verificação
-		
-		assertThat(resultado.getValor(),is(14.0));
-		
-		
-	}
 	
 	@Test
 	public void deveDevolverNaSegundaAoAlugarNoSabado() throws FilmeSemEstoqueException, LocadoraException {
+		Assume.assumeTrue(DataUtils.verificarDiaSemana(new Date(), Calendar.SATURDAY));
+		//Método Somente funciona no sábado
+		
 		//cenario
 		Usuario usuario = new Usuario("Usuario 1");
 		List<Filme> listaFilmes = Arrays.asList(new Filme("Filme 1",1,5.0));
