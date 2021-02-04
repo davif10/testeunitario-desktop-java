@@ -2,23 +2,20 @@ package br.ce.wcaquino.servicos;
 
 import static br.ce.wcaquino.matchers.MatchersProprios.caiEm;
 import static br.ce.wcaquino.matchers.MatchersProprios.caiNumaSegunda;
+import static br.ce.wcaquino.matchers.MatchersProprios.ehHoje;
+import static br.ce.wcaquino.matchers.MatchersProprios.ehHojeComDiferencaDias;
+import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.assertThat;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
-import org.hamcrest.CoreMatchers;
-import org.hamcrest.core.Is;
 import org.junit.After;
-import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.Assume;
 import org.junit.Before;
-import org.junit.BeforeClass;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ErrorCollector;
@@ -29,8 +26,6 @@ import br.ce.wcaquino.entidades.Locacao;
 import br.ce.wcaquino.entidades.Usuario;
 import br.ce.wcaquino.exceptions.FilmeSemEstoqueException;
 import br.ce.wcaquino.exceptions.LocadoraException;
-import br.ce.wcaquino.matchers.DiaSemanaMatcher;
-import br.ce.wcaquino.matchers.MatchersProprios;
 import br.ce.wcaquino.utils.DataUtils;
 
 public class LocacaoServiceTest {
@@ -68,11 +63,13 @@ public class LocacaoServiceTest {
 		Locacao locacao = service.alugarFilme(usuario, listaFilmes);
 			
 			//Verificação
-			error.checkThat(locacao.getValor(), CoreMatchers.is(CoreMatchers.equalTo(5.0)));
+			error.checkThat(locacao.getValor(), is(equalTo(5.0)));
+			error.checkThat(locacao.getDataLocacao(), ehHoje());
+			error.checkThat(locacao.getDataRetorno(), ehHojeComDiferencaDias(1));
+			
+			/*
 			error.checkThat(DataUtils.isMesmaData(locacao.getDataLocacao(),new Date()), is(true));
 			error.checkThat(DataUtils.isMesmaData(locacao.getDataRetorno(), DataUtils.obterDataComDiferencaDias(1)),CoreMatchers.is(true));
-			
-			
 			Assert.assertThat(locacao.getValor(), CoreMatchers.is(CoreMatchers.equalTo(5.0)));
 			Assert.assertThat(locacao.getValor(), CoreMatchers.is(CoreMatchers.not(6.0)));
 			assertThat(locacao.getValor(), is(5.0));
@@ -80,7 +77,7 @@ public class LocacaoServiceTest {
 			Assert.assertTrue(DataUtils.isMesmaData(locacao.getDataLocacao(), new Date()));
 			Assert.assertTrue(DataUtils.isMesmaData(locacao.getDataRetorno(), DataUtils.obterDataComDiferencaDias(1)));
 			Assert.assertThat(DataUtils.isMesmaData(locacao.getDataRetorno(), DataUtils.obterDataComDiferencaDias(1)),CoreMatchers.is(true));
-			
+			*/
 		
 		
 	}
@@ -139,7 +136,7 @@ public class LocacaoServiceTest {
 		Locacao retorno = service.alugarFilme(usuario, listaFilmes);
 		
 		//Verificacao
-		Assert.assertThat(retorno.getDataRetorno(), caiEm(Calendar.SUNDAY));
+		Assert.assertThat(retorno.getDataRetorno(), caiEm(Calendar.MONDAY));
 		Assert.assertThat(retorno.getDataRetorno(), caiNumaSegunda());
 	}
 	

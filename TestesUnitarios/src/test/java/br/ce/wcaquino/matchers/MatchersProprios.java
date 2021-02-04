@@ -1,6 +1,7 @@
 package br.ce.wcaquino.matchers;
 
 import java.util.Calendar;
+import java.util.Date;
 
 public class MatchersProprios {
 	public static DiaSemanaMatcher caiEm(Integer diaSemana) {
@@ -10,4 +11,14 @@ public class MatchersProprios {
 	public static DiaSemanaMatcher caiNumaSegunda() {
 		return new DiaSemanaMatcher(Calendar.MONDAY);
 	}
+	
+	public static DataDiferencaDiasMatcher ehHoje() {
+		return new DataDiferencaDiasMatcher(0);
+	}
+	
+	public static DataDiferencaDiasMatcher ehHojeComDiferencaDias(Integer qtdDias) {
+		return new DataDiferencaDiasMatcher(qtdDias);
+	}
+	
+
 }
