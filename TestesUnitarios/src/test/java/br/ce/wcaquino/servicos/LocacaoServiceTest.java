@@ -4,13 +4,11 @@ import static br.ce.wcaquino.builders.FilmeBuilder.umFilme;
 import static br.ce.wcaquino.builders.FilmeBuilder.umFilmeSemEstoque;
 import static br.ce.wcaquino.builders.LocacaoBuilder.umLocacao;
 import static br.ce.wcaquino.builders.UsuarioBuilder.umUsuario;
-import static br.ce.wcaquino.matchers.MatchersProprios.caiEm;
 import static br.ce.wcaquino.matchers.MatchersProprios.caiNumaSegunda;
 import static br.ce.wcaquino.matchers.MatchersProprios.ehHoje;
 import static br.ce.wcaquino.matchers.MatchersProprios.ehHojeComDiferencaDias;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
@@ -29,13 +27,16 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ErrorCollector;
 import org.junit.rules.ExpectedException;
+import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
+import org.powermock.api.mockito.PowerMockito;
+import org.powermock.core.classloader.annotations.PrepareForTest;
+import org.powermock.modules.junit4.PowerMockRunner;
 
-import br.ce.wcaquino.builders.LocacaoBuilder;
 import br.ce.wcaquino.daos.LocacaoDAO;
 import br.ce.wcaquino.entidades.Filme;
 import br.ce.wcaquino.entidades.Locacao;
@@ -45,7 +46,10 @@ import br.ce.wcaquino.exceptions.LocadoraException;
 import br.ce.wcaquino.utils.DataUtils;
 import buildermaster.BuilderMaster;
 
+@RunWith(PowerMockRunner.class)
+@PrepareForTest({LocacaoService.class, DataUtils.class})
 public class LocacaoServiceTest {
+	
 	@InjectMocks
 	private LocacaoService service;
 	@Mock
@@ -65,25 +69,16 @@ public class LocacaoServiceTest {
 	@Before
 	public void setup() {
 		MockitoAnnotations.initMocks(this);
-		
-	}
-	
-	@After
-	public void tearDown() {
-		
 	}
 	
 	@Test
 	public void deveAlugarFilme() throws Exception {
-		Assume.assumeFalse(DataUtils.verificarDiaSemana(new Date(), Calendar.SATURDAY));
-		//Verifica que não é sábado, pois o método só funciona de segunda a sexta
-		
-		
 		//Cenario 
 		//Usuario usuario = new Usuario("Usuario 1");
 		Usuario usuario = umUsuario().agora();
 		List<Filme> listaFilmes = Arrays.asList(umFilme().comValor(5.0).agora());
 	
+		PowerMockito.whenNew(Date.class).withNoArguments().thenReturn(DataUtils.obterData(23, 4, 2021));
 		
 		//Ação 
 		Locacao locacao = service.alugarFilme(usuario, listaFilmes);
@@ -92,6 +87,8 @@ public class LocacaoServiceTest {
 			error.checkThat(locacao.getValor(), is(equalTo(5.0)));
 			error.checkThat(locacao.getDataLocacao(), ehHoje());
 			error.checkThat(locacao.getDataRetorno(), ehHojeComDiferencaDias(1));
+			error.checkThat(DataUtils.isMesmaData(locacao.getDataLocacao(), DataUtils.obterData(23, 4, 2021)), is(true));
+			error.checkThat(DataUtils.isMesmaData(locacao.getDataRetorno(), DataUtils.obterData(24, 4, 2021)), is(true));
 			
 			/*
 			error.checkThat(DataUtils.isMesmaData(locacao.getDataLocacao(),new Date()), is(true));
@@ -150,20 +147,20 @@ public class LocacaoServiceTest {
 	
 	
 	@Test
-	public void deveDevolverNaSegundaAoAlugarNoSabado() throws FilmeSemEstoqueException, LocadoraException {
-		Assume.assumeTrue(DataUtils.verificarDiaSemana(new Date(), Calendar.SATURDAY));
-		//Método Somente funciona no sábado
-		
+	public void deveDevolverNaSegundaAoAlugarNoSabado() throws Exception {
+	
 		//cenario
 		Usuario usuario = umUsuario().agora();
 		List<Filme> listaFilmes = Arrays.asList(umFilme().agora());
+		
+		PowerMockito.whenNew(Date.class).withNoArguments().thenReturn(DataUtils.obterData(24, 4, 2021));
 		
 		//acao
 		Locacao retorno = service.alugarFilme(usuario, listaFilmes);
 		
 		//Verificacao
-		Assert.assertThat(retorno.getDataRetorno(), caiEm(Calendar.MONDAY));
 		Assert.assertThat(retorno.getDataRetorno(), caiNumaSegunda());
+		PowerMockito.verifyNew(Date.class, Mockito.times(2)).withNoArguments();
 	}
 	
 	public static void main(String[] args) {
