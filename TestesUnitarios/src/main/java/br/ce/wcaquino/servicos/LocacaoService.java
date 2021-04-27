@@ -6,9 +6,6 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
-import org.junit.Assert;
-import org.junit.Test;
-
 import br.ce.wcaquino.daos.LocacaoDAO;
 import br.ce.wcaquino.entidades.Filme;
 import br.ce.wcaquino.entidades.Locacao;
@@ -57,32 +54,11 @@ public class LocacaoService {
 			Locacao locacao= new Locacao();
 			locacao.setListaFilmes(listaFilmes);
 			locacao.setUsuario(usuario);
-			locacao.setDataLocacao(new Date());
-			Double valorTotal =  0d;
-			
-			for(int i = 0; i < listaFilmes.size(); i++) {
-				Filme filme = listaFilmes.get(i);
-				Double valorFilme = filme.getPrecoLocacao();
-				
-				switch(i) {
-				case 2 :valorFilme = valorFilme * 0.75;
-				break;
-				case 3 :valorFilme = valorFilme * 0.50;
-				break;
-				case 4 :valorFilme = valorFilme * 0.25;
-				break;
-				case 5 :valorFilme = 0d;
-				break;
-				
-				}
-				
-				valorTotal += valorFilme;
-			}
-			
-			locacao.setValor(valorTotal);
+			locacao.setDataLocacao(Calendar.getInstance().getTime());
+			locacao.setValor(calcularValorLocacao(listaFilmes));
 	
 		//Entrega no dia seguinte
-		Date dataEntrega = new Date();
+		Date dataEntrega = Calendar.getInstance().getTime();
 		dataEntrega = adicionarDias(dataEntrega, 1);
 		if(DataUtils.verificarDiaSemana(dataEntrega, Calendar.SUNDAY)) {
 			dataEntrega = adicionarDias(dataEntrega, 1);
@@ -93,6 +69,29 @@ public class LocacaoService {
 		dao.salvar(locacao);
 		
 		return locacao;
+	}
+
+	private Double calcularValorLocacao(List<Filme> listaFilmes) {
+		Double valorTotal =  0d;
+		for(int i = 0; i < listaFilmes.size(); i++) {
+			Filme filme = listaFilmes.get(i);
+			Double valorFilme = filme.getPrecoLocacao();
+			
+			switch(i) {
+			case 2 :valorFilme = valorFilme * 0.75;
+			break;
+			case 3 :valorFilme = valorFilme * 0.50;
+			break;
+			case 4 :valorFilme = valorFilme * 0.25;
+			break;
+			case 5 :valorFilme = 0d;
+			break;
+			
+			}
+			
+			valorTotal += valorFilme;
+		}
+		return valorTotal;
 	}
 	
 	public void notificarAtrasos() {
