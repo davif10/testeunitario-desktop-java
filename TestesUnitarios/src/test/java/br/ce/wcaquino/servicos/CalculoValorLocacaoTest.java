@@ -96,6 +96,6 @@ public class CalculoValorLocacaoTest {
 	
 	@Test
 	public void print() {
-		System.out.println(valorLocacao);
+		//System.out.println(valorLocacao);
 	}
 }
